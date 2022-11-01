@@ -107,17 +107,17 @@ install_x-ui() {
     cd /usr/local/
 
     if [ $# == 0 ]; then
-        last_version=$(curl -Ls "https://api.github.com/repos/hossinasaadi/x-ui/releases/0.3.4.dev.multi.user" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        last_version=$(curl -Ls "https://api.github.com/repos/hossinasaadi/x-ui/releases/0.3.5.dev.multi.user" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
         echo -e "检测到 x-ui 最新版本：${last_version}，开始安装"
-        wget -N --no-check-certificate -O /usr/local/x-ui-linux-${arch}.tar.gz https://github.com/hossinasaadi/x-ui/releases/download/0.3.4.dev.multi.user/x-ui-linux-${arch}.tar.gz
+        wget -N --no-check-certificate -O /usr/local/x-ui-linux-${arch}.tar.gz https://github.com/hossinasaadi/x-ui/releases/download/0.3.5.dev.multi.user/x-ui-linux-${arch}.tar.gz
         if [[ $? -ne 0 ]]; then
             echo -e "${red}下载 x-ui 失败，请确保你的服务器能够下载 Github 的文件${plain}"
             exit 1
         fi
     else
         last_version=$1
-        url="https://github.com/hossinasaadi/x-ui/releases/download/0.3.4.dev.multi.user/x-ui-linux-${arch}.tar.gz"
+        url="https://github.com/hossinasaadi/x-ui/releases/download/0.3.5.dev.multi.user/x-ui-linux-${arch}.tar.gz"
         echo -e "开始安装 x-ui v$1"
         wget -N --no-check-certificate -O /usr/local/x-ui-linux-${arch}.tar.gz ${url}
         if [[ $? -ne 0 ]]; then
