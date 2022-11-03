@@ -69,7 +69,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		return nil, err
 	}
 	for _, inbound := range inbounds {
-		if !inbound.Enable {
+		if !inbound.Enable || inbound.Blocked {
 			continue
 		}
 		inboundConfig := inbound.GenXrayInboundConfig()

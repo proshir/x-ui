@@ -125,6 +125,7 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) error {
 	oldInbound.Total = inbound.Total
 	oldInbound.Remark = inbound.Remark
 	oldInbound.Enable = inbound.Enable
+	oldInbound.Blocked = inbound.Blocked
 	oldInbound.ExpiryTime = inbound.ExpiryTime
 	oldInbound.Listen = inbound.Listen
 	oldInbound.Port = inbound.Port

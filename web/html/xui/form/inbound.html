@@ -14,6 +14,18 @@
     </a-form-item>
     <a-form-item>
         <span slot="label">
+            blocked
+            <a-tooltip>
+                <template slot="title">
+                    It shows whether this user has been blocked due to the number of IPs more than the set limit
+                </template>
+                <a-icon type="question-circle" theme="filled"></a-icon>
+            </a-tooltip>
+        </span>
+        <a-switch v-model="dbInbound.blocked"></a-switch>
+    </a-form-item>
+    <a-form-item>
+        <span slot="label">
             监听 IP
             <a-tooltip>
                 <template slot="title">

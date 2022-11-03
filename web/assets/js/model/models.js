@@ -35,6 +35,7 @@ class DBInbound {
         this.total = 0;
         this.remark = "";
         this.enable = true;
+        this.blocked = false;
         this.expiryTime = 0;
 
         this.listen = "";

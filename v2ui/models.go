@@ -15,6 +15,7 @@ type V2Inbound struct {
 	Up             int64
 	Down           int64
 	Enable         bool
+	Blocked        bool
 }
 
 func (i *V2Inbound) TableName() string {
@@ -29,6 +30,7 @@ func (i *V2Inbound) ToInbound(userId int) *model.Inbound {
 		Total:          0,
 		Remark:         i.Remark,
 		Enable:         i.Enable,
+		Blocked: 		i.Blocked,	
 		ExpiryTime:     0,
 		Listen:         i.Listen,
 		Port:           i.Port,

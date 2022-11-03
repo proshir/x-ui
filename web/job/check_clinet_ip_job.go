@@ -84,13 +84,19 @@ func processLogFile() {
 	}
 
 	var inboundsClientIps []*model.InboundClientIps
+	var idsDiable []int
 	for clientEmail, ips := range InboundClientIps {
-		inboundClientIps := GetInboundClientIps(clientEmail, ips)
+		inboundClientIps, idDisable := GetInboundClientIps(clientEmail, ips)
 		if inboundClientIps != nil {
 			inboundsClientIps = append(inboundsClientIps, inboundClientIps)
 		}
+		if idDisable != nil {
+			idsDiable = append(idsDiable, *idDisable)
+		}
 	}
 
+	err = CheckBlockInbounds(idsDiable)
+	checkError(err)
 	err = AddInboundsClientIps(inboundsClientIps)
 	checkError(err)
 }
@@ -136,10 +142,10 @@ func ClearInboudClientIps() error {
 	return err
 }
 
-func GetInboundClientIps(clientEmail string, ips []string) *model.InboundClientIps {
+func GetInboundClientIps(clientEmail string, ips []string) (*model.InboundClientIps, *int) {
 	jsonIps, err := json.Marshal(ips)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 
 	inboundClientIps := &model.InboundClientIps{}
@@ -148,20 +154,20 @@ func GetInboundClientIps(clientEmail string, ips []string) *model.InboundClientI
 
 	inbound, err := GetInboundByEmail(clientEmail)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 	limitIpRegx, _ := regexp.Compile(`"limitIp": .+`)
 	limitIpMactch := limitIpRegx.FindString(inbound.Settings)
 	limitIpMactch =  ss.Split(limitIpMactch, `"limitIp": `)[1]
     limitIp, err := strconv.Atoi(limitIpMactch)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
-	if(limitIp < len(ips) && limitIp != 0 && inbound.Enable) {
-		DisableInbound(inbound.Id)
+	if(limitIp < len(ips) && limitIp != 0 && !inbound.Blocked) {
+		return inboundClientIps, &inbound.Id
 	}
 
-	return inboundClientIps
+	return inboundClientIps, nil
 }
 
 func AddInboundsClientIps(inboundsClientIps []*model.InboundClientIps) error {
@@ -190,13 +196,12 @@ func GetInboundByEmail(clientEmail string) (*model.Inbound, error) {
 	return inbounds, nil
 }
 
-func DisableInbound(id int) error {
+func CheckBlockInbounds(ids []int) error {
 	db := database.GetDB()
 	result := db.Model(model.Inbound{}).
-		Where("id = ? and enable = ?", id, true).
-		Update("enable", false)
+		Where("1 = 1").
+		Update("blocked", gorm.Expr("id in ?", ids))
 	err := result.Error
-	logger.Warning("disable inbound with id:",id)
 
 	if err == nil {
 		job.xrayService.SetToNeedRestart()
