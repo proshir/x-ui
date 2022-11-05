@@ -11,6 +11,7 @@ import (
     "encoding/json"
 	"gorm.io/gorm"
     "strconv"
+	"time"
 
 )
 
@@ -30,6 +31,8 @@ func (j *CheckClientIpJob) Run() {
 	processLogFile()
 }
 
+var lastChecked time.Time
+
 func processLogFile() {
 	accessLogPath := GetAccessLogPath()
 	if(accessLogPath == "") {
@@ -41,11 +44,13 @@ func processLogFile() {
 	InboundClientIps := make(map[string][]string)
     checkError(err)
 
-	// clean log
-	if err := os.Truncate(GetAccessLogPath(), 0); err != nil {
-		checkError(err)
+	if (lastChecked.IsZero() || time.Now().Sub(lastChecked) > time.Minute ) {
+		if err := os.Truncate(GetAccessLogPath(), 0); err != nil {
+			checkError(err)
+		}
+		lastChecked = time.Now()
 	}
-	
+
 	lines := ss.Split(string(data), "\n")
 	for _, line := range lines {
 		ipRegx, _ := regexp.Compile(`[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+`)
@@ -68,21 +73,10 @@ func processLogFile() {
 				if(contains(InboundClientIps[matchesEmail],ip)){
 					continue
 				}
-				InboundClientIps[matchesEmail] = append(InboundClientIps[matchesEmail],ip)
-
-				
-
-			}else{
+			}
 			InboundClientIps[matchesEmail] = append(InboundClientIps[matchesEmail],ip)
 		}
-		}
-
 	}
-	err = ClearInboudClientIps()
-	if err != nil {
-		return
-	}
-
 	var inboundsClientIps []*model.InboundClientIps
 	var idsDiable []int
 	for clientEmail, ips := range InboundClientIps {
@@ -135,9 +129,8 @@ func contains(s []string, str string) bool {
 	return false
 }
 
-func ClearInboudClientIps() error {
-	db := database.GetDB()
-	err := db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.InboundClientIps{}).Error
+func ClearInboudClientIps(tx *gorm.DB) error {
+	err := tx.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.InboundClientIps{}).Error
 	checkError(err)
 	return err
 }
@@ -163,7 +156,7 @@ func GetInboundClientIps(clientEmail string, ips []string) (*model.InboundClient
 	if err != nil {
 		return nil, nil
 	}
-	if(limitIp < len(ips) && limitIp != 0 && !inbound.Blocked) {
+	if(limitIp < len(ips) && limitIp != 0 && inbound.Enable) {
 		return inboundClientIps, &inbound.Id
 	}
 
@@ -176,8 +169,12 @@ func AddInboundsClientIps(inboundsClientIps []*model.InboundClientIps) error {
 	}
 	db := database.GetDB()
 	tx := db.Begin()
-
-	err := tx.Save(inboundsClientIps).Error
+	err := ClearInboudClientIps(tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Save(inboundsClientIps).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -201,6 +198,7 @@ func CheckBlockInbounds(ids []int) error {
 	result := db.Model(model.Inbound{}).
 		Where("1 = 1").
 		Update("blocked", gorm.Expr("id in ?", ids))
+	logger.Debug("Block IDs:", ids)
 	err := result.Error
 
 	if err == nil {
