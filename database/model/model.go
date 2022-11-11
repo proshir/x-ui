@@ -76,3 +76,7 @@ type Client struct {
 	LimitIP int `json:"limitIp"`
 	Security string `json:"security"`
 }
+
+type Settings struct {
+	Clients []Client `json:"clients"`
+}

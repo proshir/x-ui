@@ -198,7 +198,8 @@ func updateInboundClientIps(inboundClientIps *model.InboundClientIps,clientEmail
 	}
 
 	settings := map[string][]model.Client{}
-	json.Unmarshal([]byte(inbound.Settings), &settings)
+	err = json.Unmarshal([]byte(inbound.Settings), &settings)
+	checkError(err)
 	clients := settings["clients"]
 
 	for _, client := range clients {
