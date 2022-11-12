@@ -50,9 +50,20 @@
             </a-tooltip>
         </span>
         <a-date-picker :show-time="{ format: 'HH:mm' }" format="YYYY-MM-DD HH:mm"
-                       v-model="dbInbound._expiryTime" style="width: 300px;"></a-date-picker>
+                       v-model="dbInbound._expiryTime"></a-date-picker>
+        <div style="display: inline-flex; position: absolute;">
+            <button class="buttonDate" @click="changeDate(dbInbound, -1)" style="font-size: 30px; padding-top: 0px; padding-bottom: 0px; scale: 0.7; min-width: 33px; margin-top: 0px;">-</button>
+            <button class="buttonDate" @click="changeDate(dbInbound, 1)" style="font-size: 30px;padding-top: 0px;padding-bottom: 0px; scale: 0.7; margin-top: 0px;">+</button>
+        </div>
     </a-form-item>
 </a-form>
+
+<script>
+    document.getElementsByClassName("buttonDate").style = "font-size: 30px; padding-top: 0; padding-bottom: 0; position: absolute; scale: 0.7;"
+    function changeDate(inbound, u) {
+        inbound._expiryTime = moment(inbound._expiryTime).add(30 * u, 'd');
+    }
+</script>
 
 <!-- vmess settings -->
 <template v-if="inbound.protocol === Protocols.VMESS">
