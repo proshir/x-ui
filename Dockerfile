@@ -5,7 +5,7 @@ RUN go build main.go
 
 
 FROM debian:11-slim
-LABEL org.opencontainers.image.authors="hossin.asaadi77@gmail.com"
+LABEL org.opencontainers.image.authors="hassanardeshir1020@gmail.com"
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends -y ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
