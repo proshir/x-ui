@@ -26,6 +26,8 @@ func NewInboundController(g *gin.RouterGroup) *InboundController {
 func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g = g.Group("/inbound")
 
+	g.POST("/resetalltraffic", a.resetAllTraffic)
+
 	g.POST("/list", a.getInbounds)
 	g.POST("/add", a.addInbound)
 	g.POST("/del/:id", a.delInbound)
@@ -149,6 +151,15 @@ func (a *InboundController) resetClientTraffic(c *gin.Context) {
 	email := c.Param("email")
 
 	err := a.inboundService.ResetClientTraffic(email)
+	if err != nil {
+		jsonMsg(c, "something worng!", err)
+		return
+	}
+	jsonMsg(c, "traffic reseted", nil)
+}
+func (a *InboundController) resetAllTraffic(c *gin.Context) {
+
+	err := a.inboundService.ResetAllTraffic()
 	if err != nil {
 		jsonMsg(c, "something worng!", err)
 		return

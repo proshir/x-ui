@@ -15,7 +15,7 @@ func NewCheckInboundJob() *CheckInboundJob {
 }
 
 func (j *CheckInboundJob) Run() {
-	count, err := j.inboundService.ResetTrafficClients()
+	count, err := j.inboundService.CheckResetTimeClients()
 	if err != nil {
 		logger.Warning("reset traffic Client err:", err)
 	}

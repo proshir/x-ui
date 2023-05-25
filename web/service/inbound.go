@@ -335,7 +335,7 @@ func (s *InboundService) DisableInvalidClients() (int64, error) {
 	count := result.RowsAffected
 	return count, err
 }
-func (s *InboundService) ResetTrafficClients() (int64, error) {
+func (s *InboundService) CheckResetTimeClients() (int64, error) {
 	db := database.GetDB()
 	now := time.Now().Unix() * 1000
 	result := db.Model(xray.ClientTraffic{}).
@@ -451,4 +451,27 @@ func (s *InboundService) GetClientTrafficById(uuid string) (traffic *xray.Client
 		return nil, err
 	}
 	return traffic, err
+}
+func (s *InboundService) ResetAllTraffic() (error) {
+	db := database.GetDB()
+
+	err := db.Model(&xray.ClientTraffic{}).
+		Where("up > 0 or down > 0").
+		Update("up", 0).
+		Update("down", 0).Error
+
+	if err != nil {
+		return err
+	}
+
+	err = db.Model(&model.Inbound{}).
+		Where("up > 0 or down > 0").
+		Update("up", 0).
+		Update("down", 0).Error
+	
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }

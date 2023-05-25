@@ -65,7 +65,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.inboundService.ResetTrafficClients()
+	s.inboundService.CheckResetTimeClients()
 
 	s.inboundService.DisableInvalidClients()
 
