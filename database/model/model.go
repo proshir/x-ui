@@ -78,4 +78,5 @@ type Client struct {
 	Security string `json:"security"`
 	TotalGB      int64  `json:"totalGB" form:"totalGB"`
 	ExpiryTime int64  `json:"expiryTime" form:"expiryTime"`
+	ResetDate int64  `json:"resetDate" form:"resetDate"`
 }

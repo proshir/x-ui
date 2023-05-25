@@ -295,11 +295,13 @@ func (s *InboundService) AddClientTraffic(traffics []*xray.ClientTraffic) (err e
 			if traffic.Email == client.Email {
 				traffic.ExpiryTime = client.ExpiryTime
 				traffic.Total = client.TotalGB
+				traffic.ResetDate = client.ResetDate
 			}
 		}
 		if tx.Where("inbound_id = ?", inbound.Id).Where("email = ?", traffic.Email).
 		UpdateColumn("enable", true).
 		UpdateColumn("expiry_time", traffic.ExpiryTime).
+		UpdateColumn("resetDate", traffic.ResetDate).
 		UpdateColumn("total",traffic.Total).
 		UpdateColumn("up", gorm.Expr("up + ?", traffic.Up)).
 		UpdateColumn("down", gorm.Expr("down + ?", traffic.Down)).RowsAffected == 0 {
@@ -345,13 +347,14 @@ func (s *InboundService) UpdateClientStat(inboundId int, inboundSettings string)
 	for _, client := range clients {
 		result := db.Model(xray.ClientTraffic{}).
 		Where("inbound_id = ? and email = ?", inboundId, client.Email).
-		Updates(map[string]interface{}{"enable": true, "total": client.TotalGB, "expiry_time": client.ExpiryTime})
+		Updates(map[string]interface{}{"enable": true, "total": client.TotalGB, "expiry_time": client.ExpiryTime, "resetDate": client.ResetDate})
 		if result.RowsAffected == 0 {
 			clientTraffic := xray.ClientTraffic{}
 			clientTraffic.InboundId = inboundId
 			clientTraffic.Email = client.Email
 			clientTraffic.Total = client.TotalGB
 			clientTraffic.ExpiryTime = client.ExpiryTime
+			clientTraffic.ResetDate = client.ResetDate
 			clientTraffic.Enable = true
 			clientTraffic.Up = 0
 			clientTraffic.Down = 0

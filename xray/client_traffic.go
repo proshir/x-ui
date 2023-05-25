@@ -8,5 +8,6 @@ type ClientTraffic struct {
 	Up        int64 `json:"up" form:"up"`
 	Down      int64 `json:"down" form:"down"`
 	ExpiryTime int64  `json:"expiryTime" form:"expiryTime"`
+	ResetDate int64  `json:"resetDate" form:"resetDate"`
 	Total      int64  `json:"total" form:"total"`
 }

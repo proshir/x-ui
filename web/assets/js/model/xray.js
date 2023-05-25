@@ -1181,7 +1181,7 @@ Inbound.VmessSettings = class extends Inbound.Settings {
     }
 };
 Inbound.VmessSettings.Vmess = class extends XrayCommonClass {
-    constructor(id=RandomUtil.randomUUID(), alterId=0, email='', limitIp=0, totalGB=0, expiryTime='') {
+    constructor(id=RandomUtil.randomUUID(), alterId=0, email='', limitIp=0, totalGB=0, expiryTime='', resetDate='') {
         super();
         this.id = id;
         this.alterId = alterId;
@@ -1189,6 +1189,7 @@ Inbound.VmessSettings.Vmess = class extends XrayCommonClass {
         this.limitIp = limitIp;
         this.totalGB = totalGB;
         this.expiryTime = expiryTime;
+        this.resetDate = resetDate;
     }
 
     static fromJson(json={}) {
@@ -1199,7 +1200,7 @@ Inbound.VmessSettings.Vmess = class extends XrayCommonClass {
             json.limitIp,
             json.totalGB,
             json.expiryTime,
-
+            json.resetDate
         );
     }
     get _expiryTime() {
@@ -1214,6 +1215,20 @@ Inbound.VmessSettings.Vmess = class extends XrayCommonClass {
             this.expiryTime = 0;
         } else {
             this.expiryTime = t.valueOf();
+        }
+    }
+    get _resetDate() {
+        if (this.resetDate === 0 || this.resetDate === "") {
+            return null;
+        }
+        return moment(this.resetDate);
+    }
+
+    set _resetDate(t) {
+        if (t == null || t === "") {
+            this.resetDate = 0;
+        } else {
+            this.resetDate = t.valueOf();
         }
     }
     get _totalGB() {
@@ -1265,7 +1280,7 @@ Inbound.VLESSSettings = class extends Inbound.Settings {
 };
 Inbound.VLESSSettings.VLESS = class extends XrayCommonClass {
 
-    constructor(id=RandomUtil.randomUUID(), flow=FLOW_CONTROL.DIRECT, email='', limitIp=0, totalGB=0, expiryTime='') {
+    constructor(id=RandomUtil.randomUUID(), flow=FLOW_CONTROL.DIRECT, email='', limitIp=0, totalGB=0, expiryTime='', resetDate='') {
         super();
         this.id = id;
         this.flow = flow;
@@ -1273,7 +1288,7 @@ Inbound.VLESSSettings.VLESS = class extends XrayCommonClass {
         this.limitIp = limitIp;
         this.totalGB = totalGB;
         this.expiryTime = expiryTime;
-
+        this.resetDate = resetDate;
     }
 
     static fromJson(json={}) {
@@ -1284,7 +1299,7 @@ Inbound.VLESSSettings.VLESS = class extends XrayCommonClass {
             json.limitIp,
             json.totalGB,
             json.expiryTime,
-
+            json.resetDate
         );
     }
 
@@ -1300,6 +1315,20 @@ Inbound.VLESSSettings.VLESS = class extends XrayCommonClass {
             this.expiryTime = 0;
         } else {
             this.expiryTime = t.valueOf();
+        }
+    }
+    get _resetDate() {
+        if (this.resetDate === 0 || this.resetDate === "") {
+            return null;
+        }
+        return moment(this.resetDate);
+    }
+
+    set _resetDate(t) {
+        if (t == null || t === "") {
+            this.resetDate = 0;
+        } else {
+            this.resetDate = t.valueOf();
         }
     }
     get _totalGB() {
