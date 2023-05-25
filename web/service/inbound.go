@@ -295,13 +295,11 @@ func (s *InboundService) AddClientTraffic(traffics []*xray.ClientTraffic) (err e
 			if traffic.Email == client.Email {
 				traffic.ExpiryTime = client.ExpiryTime
 				traffic.Total = client.TotalGB
-				traffic.ResetDate = client.ResetDate
 			}
 		}
 		if tx.Where("inbound_id = ?", inbound.Id).Where("email = ?", traffic.Email).
 		UpdateColumn("enable", true).
 		UpdateColumn("expiry_time", traffic.ExpiryTime).
-		UpdateColumn("resetDate", traffic.ResetDate).
 		UpdateColumn("total",traffic.Total).
 		UpdateColumn("up", gorm.Expr("up + ?", traffic.Up)).
 		UpdateColumn("down", gorm.Expr("down + ?", traffic.Down)).RowsAffected == 0 {
@@ -331,8 +329,21 @@ func (s *InboundService) DisableInvalidClients() (int64, error) {
 	db := database.GetDB()
 	now := time.Now().Unix() * 1000
 	result := db.Model(xray.ClientTraffic{}).
-		Where("((total > 0 and up + down >= total) or (expiry_time > 0 and expiry_time <= ?)) and enable = ?", now, true).
+		Where("((total > 0 and up + down >= total and (reset_date == 0 or reset_date > ?)) or (expiry_time > 0 and expiry_time <= ?)) and enable = ?", now, now, true).
 		Update("enable", false)
+	err := result.Error
+	count := result.RowsAffected
+	return count, err
+}
+func (s *InboundService) CheckResetTimeClients() (int64, error) {
+	db := database.GetDB()
+	now := time.Now().Unix() * 1000
+	result := db.Model(xray.ClientTraffic{}).
+		Where("reset_date > 0 and reset_date <= ?", now).
+		Update("up", 0).
+		Update("down", 0).
+		Update("reset_date", gorm.Expr("reset_date + 2592000000"))
+		
 	err := result.Error
 	count := result.RowsAffected
 	return count, err
@@ -347,14 +358,14 @@ func (s *InboundService) UpdateClientStat(inboundId int, inboundSettings string)
 	for _, client := range clients {
 		result := db.Model(xray.ClientTraffic{}).
 		Where("inbound_id = ? and email = ?", inboundId, client.Email).
-		Updates(map[string]interface{}{"enable": true, "total": client.TotalGB, "expiry_time": client.ExpiryTime, "resetDate": client.ResetDate})
+		Updates(map[string]interface{}{"enable": true, "total": client.TotalGB, "expiry_time": client.ExpiryTime, "reset_date": client.StartDate})
 		if result.RowsAffected == 0 {
 			clientTraffic := xray.ClientTraffic{}
 			clientTraffic.InboundId = inboundId
 			clientTraffic.Email = client.Email
 			clientTraffic.Total = client.TotalGB
 			clientTraffic.ExpiryTime = client.ExpiryTime
-			clientTraffic.ResetDate = client.ResetDate
+			clientTraffic.ResetDate = client.StartDate
 			clientTraffic.Enable = true
 			clientTraffic.Up = 0
 			clientTraffic.Down = 0
@@ -440,4 +451,27 @@ func (s *InboundService) GetClientTrafficById(uuid string) (traffic *xray.Client
 		return nil, err
 	}
 	return traffic, err
+}
+func (s *InboundService) ResetAllTraffic() (error) {
+	db := database.GetDB()
+
+	err := db.Model(&xray.ClientTraffic{}).
+		Where("up > 0 or down > 0").
+		Update("up", 0).
+		Update("down", 0).Error
+
+	if err != nil {
+		return err
+	}
+
+	err = db.Model(&model.Inbound{}).
+		Where("up > 0 or down > 0").
+		Update("up", 0).
+		Update("down", 0).Error
+	
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }

@@ -160,6 +160,22 @@
                     }
                 }
             },
+            getResetDate(email) {
+                clientStats = this.inbound.clientStats
+                if(clientStats.length > 0)
+                {
+                    for (const key in clientStats) {
+                        if (Object.hasOwnProperty.call(clientStats, key)) {
+                            if(clientStats[key]['email'] == email) {
+                                let rTime = clientStats[key]['resetDate']
+                                if (rTime == 0)
+                                    return null
+                                return moment.unix(rTime/1000).format('YYYY-MM-DD HH:mm') 
+                            }
+                        }
+                    }
+                }
+            },
             isClientEnable(email) {
                 clientStats = this.inbound.clientStats
                 if(clientStats.length > 0)

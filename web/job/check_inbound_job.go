@@ -15,7 +15,12 @@ func NewCheckInboundJob() *CheckInboundJob {
 }
 
 func (j *CheckInboundJob) Run() {
-	count, err := j.inboundService.DisableInvalidClients()
+	count, err := j.inboundService.CheckResetTimeClients()
+	if err != nil {
+		logger.Warning("reset traffic Client err:", err)
+	}
+
+	count, err = j.inboundService.DisableInvalidClients()
 	if err != nil {
 		logger.Warning("disable invalid Client err:", err)
 	} else if count > 0 {

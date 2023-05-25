@@ -65,6 +65,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	s.inboundService.CheckResetTimeClients()
 
 	s.inboundService.DisableInvalidClients()
 
@@ -94,7 +95,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 							logger.Info("Remove Inbound User",c["email"] ,"due the expire or traffic limit")
 
 						}
-
+						
 					}
 				}
 		
