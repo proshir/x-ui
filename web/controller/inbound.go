@@ -29,6 +29,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.POST("/resetalltraffic", a.resetAllTraffic)
 
 	g.POST("/list", a.getInbounds)
+	g.POST("/listt", a.getInboundst)
 	g.POST("/add", a.addInbound)
 	g.POST("/del/:id", a.delInbound)
 	g.POST("/update/:id", a.updateInbound)
@@ -61,6 +62,14 @@ func (a *InboundController) getInbounds(c *gin.Context) {
 		return
 	}
 	jsonObj(c, inbounds, nil)
+}
+func (a *InboundController) getInboundst(c *gin.Context) {
+	clients, err := a.inboundService.GetAllClientsFmt()
+	if err != nil {
+		jsonMsg(c, I18n(c , "pages.inbounds.toasts.obtain"), err)
+		return
+	}
+	jsonObj(c, clients, nil)
 }
 func (a *InboundController) getInbound(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))

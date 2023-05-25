@@ -36,6 +36,47 @@ func (s *InboundService) GetAllInbounds() ([]*model.Inbound, error) {
 	return inbounds, nil
 }
 
+func (s *InboundService) GetAllClientsFmt() ([]*model.ClientFmt, error) {
+	inbounds, err := s.GetAllInbounds()
+
+	if err != nil {
+		return nil, err
+	}
+	
+	db := database.GetDB()
+
+	var clientsTraffic []*xray.ClientTraffic
+	if db.Model(&xray.ClientTraffic{}).
+		Find(&clientsTraffic).Error != nil {
+			return nil, db.Error
+		}
+
+	fmts := []*model.ClientFmt{}
+	for _, inbound := range inbounds {
+		clients, err := s.getClients(inbound)
+		if err != nil {
+			return nil, err
+		}
+		for _, client := range clients {
+			for _, traffic := range(inbound.ClientStats) {
+				if client.Email == traffic.Email {
+					fmtItem := model.ClientFmt{
+						ID:       client.ID,
+						LimitIP:  client.LimitIP,
+						TotalGB:  client.TotalGB,
+						StartDate: client.StartDate,
+						Up:       traffic.Up,
+						Down:     traffic.Down,
+					}
+					fmts = append(fmts, &fmtItem)
+					break;
+				}
+			}
+		}
+	}
+	return fmts, nil
+}
+
 func (s *InboundService) checkPortExist(port int, ignoreId int) (bool, error) {
 	db := database.GetDB()
 	db = db.Model(model.Inbound{}).Where("port = ?", port)

@@ -80,3 +80,11 @@ type Client struct {
 	ExpiryTime int64  `json:"expiryTime" form:"expiryTime"`
 	StartDate int64  `json:"startDate"`
 }
+type ClientFmt struct {
+	ID       string `json:"id"`
+	LimitIP int `json:"limitIp"`
+	TotalGB      int64  `json:"totalGB"`
+	StartDate int64  `json:"startDate"`
+	Up         int64  `json:"up"`
+	Down       int64  `json:"down"`
+}
