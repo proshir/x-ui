@@ -64,7 +64,7 @@ func (s *InboundService) GetAllClientsFmt() ([]*model.ClientFmt, error) {
 						ID:       client.ID,
 						LimitIP:  client.LimitIP,
 						TotalGB:  client.TotalGB,
-						StartDate: client.StartDate,
+						ResetDate: traffic.ResetDate,
 						Up:       traffic.Up,
 						Down:     traffic.Down,
 					}

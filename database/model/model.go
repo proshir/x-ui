@@ -84,7 +84,7 @@ type ClientFmt struct {
 	ID       string `json:"id"`
 	LimitIP int `json:"limitIp"`
 	TotalGB      int64  `json:"totalGB"`
-	StartDate int64  `json:"startDate"`
+	ResetDate int64  `json:"resetDate"`
 	Up         int64  `json:"up"`
 	Down       int64  `json:"down"`
 }
