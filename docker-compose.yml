@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   xui:
-    image: proshir/x-ui
+    image: proshir/mxui:v3-release
     container_name: x-ui
     volumes:
       - $PWD/db/:/etc/x-ui/

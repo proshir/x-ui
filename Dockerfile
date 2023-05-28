@@ -1,4 +1,4 @@
-FROM golang:latest AS builder
+FROM golang:1.19.3 AS builder
 WORKDIR /root
 COPY . .
 RUN go build main.go

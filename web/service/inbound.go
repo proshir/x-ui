@@ -496,10 +496,12 @@ func (s *InboundService) GetClientTrafficById(uuid string) (traffic *xray.Client
 func (s *InboundService) ResetAllTraffic() (error) {
 	db := database.GetDB()
 
-	err := db.Model(&xray.ClientTraffic{}).
-		Where("up > 0 or down > 0").
-		Update("up", 0).
-		Update("down", 0).Error
+	err := db.Model(xray.ClientTraffic{}).
+		Where("1=1").
+		UpdateColumn("up", 0).
+		UpdateColumn("down", 0).
+		UpdateColumn("enable", true).
+		Error
 
 	if err != nil {
 		return err
